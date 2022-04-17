@@ -15,6 +15,10 @@ You can download the latest version of **V64CoreConsole** from the [releases](ht
 - *If the project has missing references to **LibV64Core**, check its [Usage guide](https://github.com/Llennpie/LibV64Core#usage) in the submodule.*
 - Build the solution
 
+---
+
+![Screenshot](https://media.discordapp.net/attachments/814630624920076298/965060514851991602/unknown.png?width=960&height=526)
+
 ## Credits
 
 - *[Project Comet](https://github.com/projectcomet64)* and *[GlitchyPSI](https://github.com/GlitchyPSIX)* for creating [M64MM3](https://github.com/projectcomet64/M64MM).
