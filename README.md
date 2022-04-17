@@ -1,19 +1,19 @@
 # V64CoreConsole
 
 - **V64CoreConsole** is a C# console application equipped with *Super Mario 64* machinima creation tools.
-- This project is based on, and was created to show off [LibV64Core](https://github.com/Llennpie/LibV64Core).
+- This project was solely created to show off [LibV64Core](https://github.com/Llennpie/LibV64Core).
 
 ## Installation
 
-You can download the latest version of **V64CoreConsole** from the [releases](https://github.com/Llennpie/Saturn/releases) page.
+You can download the latest version of **V64CoreConsole** from the [releases](https://github.com/Llennpie/V64CoreConsole/releases) page.
 
 ### *OR*
 
 **To build from source,** 
-- Download **Visual Studio 2019** *(or greater)* and download the **.NET desktop development** workload
+- Download **Visual Studio 2019** *(or greater)* and install the **.NET desktop development** workload
 - Clone the entire project with `git clone https://github.com/Llennpie/V64CoreConsole --recursive`
 - *If the project has missing references to **LibV64Core**, check its [Usage guide](https://github.com/Llennpie/LibV64Core#usage) in the submodule.*
-- Build the solution
+- Build the solution as x64
 
 ---
 
