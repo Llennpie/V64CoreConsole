@@ -42,10 +42,10 @@ namespace V64CoreConsole
                 switch (command)
                 {
                     case "help":
-                        Console.WriteLine("\nV64CoreConsole\n\n" + 
-                            "help - Display this message\n" + 
-                            "quit - Safely exits the application\n" + 
-                            "freeze - Toggles camera freeze/unfreeze\n" + 
+                        Console.WriteLine("\nV64CoreConsole\n\n" +
+                            "help - Display this message\n" +
+                            "quit - Safely exits the application\n" +
+                            "freeze - Toggles camera freeze/unfreeze\n" +
                             "getgs - Displays the current loaded color code\n" +
                             "loadgsfile - Loads a color code from a file (colorcodes\\)\n" +
                             "savegsfile - Saves a color code to a file (colorcodes\\)");

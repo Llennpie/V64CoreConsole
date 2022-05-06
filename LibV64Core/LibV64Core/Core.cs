@@ -32,7 +32,8 @@ namespace LibV64Core
                 byte[] writeFreezeData = BitConverter.GetBytes(freezeCameraData - 128);
                 Memory.WriteBytes(Memory.BaseAddress + 0x33C84B, writeFreezeData);
                 Console.WriteLine("[C] Camera Unfrozen");
-            } else
+            }
+            else
             {
                 // Freeze the camera
                 byte[] writeFreezeData = BitConverter.GetBytes(freezeCameraData + 128);
