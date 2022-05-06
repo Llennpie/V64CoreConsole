@@ -23,6 +23,8 @@ namespace V64CoreConsole
 
             Core.FixCameraZoomOut();
             Console.WriteLine("[C] Applied Zoom Fix");
+            Core.FixResetBodyState();
+            Console.WriteLine("[C] Applied BodyState Patch");
 
             // Run console stuff
             RunCommandLoop();
@@ -54,9 +56,78 @@ namespace V64CoreConsole
                         break;
 
                     case "freeze":
-                        Core.FreezeCamera(!Core.CameraFrozen);
-                        if (Core.CameraFrozen) { Console.WriteLine("[C] Camera Frozen"); }
-                        else { Console.WriteLine("[C] Camera Unfrozen"); }
+                        Core.ToggleFreezeCamera();
+                        break;
+
+                    case "eyeswap":
+                        Console.WriteLine("(blink, open, half, closed, left, right, up, down, dead)\nEnter one of the above: ");
+                        string chosenEyeName = Console.ReadLine();
+
+                        switch (chosenEyeName)
+                        {
+                            case "blink":
+                                Core.SetEyeState(Types.EyeState.BLINKING);
+                                break;
+                            case "open":
+                                Core.SetEyeState(Types.EyeState.OPEN);
+                                break;
+                            case "half":
+                                Core.SetEyeState(Types.EyeState.HALF);
+                                break;
+                            case "closed":
+                                Core.SetEyeState(Types.EyeState.CLOSED);
+                                break;
+                            case "left":
+                                Core.SetEyeState(Types.EyeState.LEFT);
+                                break;
+                            case "right":
+                                Core.SetEyeState(Types.EyeState.RIGHT);
+                                break;
+                            case "up":
+                                Core.SetEyeState(Types.EyeState.UP);
+                                break;
+                            case "down":
+                                Core.SetEyeState(Types.EyeState.DOWN);
+                                break;
+                            case "dead":
+                                Core.SetEyeState(Types.EyeState.DEAD);
+                                break;
+                            default:
+                                Core.SetEyeState(Types.EyeState.BLINKING);
+                                break;
+                        }
+
+                        break;
+
+                    case "handswap":
+                        Console.WriteLine("(fists, open, peace, cap, wingcap, right)\nEnter one of the above: ");
+                        string chosenHandName = Console.ReadLine();
+
+                        switch (chosenHandName)
+                        {
+                            case "fists":
+                                Core.SetHandState(Types.HandState.FISTS);
+                                break;
+                            case "open":
+                                Core.SetHandState(Types.HandState.OPEN);
+                                break;
+                            case "peace":
+                                Core.SetHandState(Types.HandState.PEACE);
+                                break;
+                            case "cap":
+                                Core.SetHandState(Types.HandState.WITH_CAP);
+                                break;
+                            case "wingcap":
+                                Core.SetHandState(Types.HandState.WITH_WING_CAP);
+                                break;
+                            case "right":
+                                Core.SetHandState(Types.HandState.RIGHT_OPEN);
+                                break;
+                            default:
+                                Core.SetHandState(Types.HandState.FISTS);
+                                break;
+                        }
+
                         break;
 
                     case "getgs":
