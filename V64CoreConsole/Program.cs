@@ -48,7 +48,9 @@ namespace V64CoreConsole
                             "freeze - Toggles camera freeze/unfreeze\n" +
                             "getgs - Displays the current loaded color code\n" +
                             "loadgsfile - Loads a color code from a file (colorcodes\\)\n" +
-                            "savegsfile - Saves a color code to a file (colorcodes\\)");
+                            "savegsfile - Saves a color code to a file (colorcodes\\)\n" +
+                            "eyeswap - Changes Mario's eye state\n" +
+                            "handswap - Changes Mario's hand state");
                         break;
 
                     case "quit":
