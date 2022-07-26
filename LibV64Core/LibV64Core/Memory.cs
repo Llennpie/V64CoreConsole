@@ -19,7 +19,7 @@ namespace LibV64Core
         static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, long nSize, ref long lpNumberOfBytesWritten);
         #endregion
 
-        public static Process emulatorProcess;
+        public static Process? emulatorProcess;
         private static IntPtr emulatorProcessHandle;
         const int PROCESS_ALL_ACCESS = 0x01F0FF;
 
@@ -47,29 +47,30 @@ namespace LibV64Core
         /// <param name="processName"></param>
         public static Process[] GetEmulatorProcesses(string processName = "Project64")
         {
-            if (IsEmulatorOpen)
-                return null;
-
             // To account for multiple emulator processes, we store them in an array.
             Process[] emulators = Process.GetProcessesByName(processName);
 
-            if (emulators != null)
+            if (emulators == null || emulators.Length == 0)
+            {
+                throw new InvalidOperationException("ERROR: Could not find active Project64 process");
+            }
+            else
+            {
                 return emulators;
-
-            return null;
+            }
         }
 
         /// <summary>
         /// Hooks a single emulator process.
         /// </summary>
         /// <param name="process"></param>
-        public static void HookEmulatorProcess(Process process)
+        public static void HookEmulatorProcess(Process? process)
         {
-            if (process == null)
-                return;
-
-            emulatorProcess = process;
-            emulatorProcessHandle = process.Handle;
+            if (process != null)
+            {
+                emulatorProcess = process;
+                emulatorProcessHandle = process.Handle;
+            }
         }
 
         /// <summary>

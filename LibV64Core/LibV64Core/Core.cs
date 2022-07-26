@@ -11,6 +11,7 @@ namespace LibV64Core
     {
         #region Camera
         public static bool CameraFrozen;
+        private static int CamFlags;
 
         /// <summary>
         /// Freezes/unfreezes the game camera.
@@ -20,29 +21,18 @@ namespace LibV64Core
             if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
                 return;
 
-            // First, fetch the address to determine the current state of the camera
-            int freezeCameraData = Memory.SwapEndian(Memory.ReadBytes(Memory.BaseAddress + 0x33C84B, 1), 4)[0];
-
-            // If the camera contains 0x80 (the pause movement flag), the camera is already frozen
-            CameraFrozen = (freezeCameraData & 128) == 128;
-
             if (CameraFrozen)
             {
                 // Unfreeze the camera
-                byte[] writeFreezeData = BitConverter.GetBytes(freezeCameraData - 128);
-                Memory.WriteBytes(Memory.BaseAddress + 0x33C84B, writeFreezeData);
+                Memory.WriteBytes(Memory.BaseAddress + 0x33C848 + 3, new byte[] {0x01});
                 Console.WriteLine("[C] Camera Unfrozen");
             }
             else
             {
                 // Freeze the camera
-                byte[] writeFreezeData = BitConverter.GetBytes(freezeCameraData + 128);
-                Memory.WriteBytes(Memory.BaseAddress + 0x33C84B, writeFreezeData);
+                Memory.WriteBytes(Memory.BaseAddress + 0x33C848 + 3, new byte[] { 0x80 });
                 Console.WriteLine("[C] Camera Frozen");
             }
-
-            // One last check for the pause movement flag
-            CameraFrozen = (freezeCameraData & 128) == 128;
         }
 
         /// <summary>
@@ -54,6 +44,28 @@ namespace LibV64Core
                 return;
 
             Memory.WriteBytes(Memory.BaseAddress + 0x32F870, new byte[20]);
+
+            // Define movement flags
+            CamFlags = Memory.SwapEndian(Memory.ReadBytes(Memory.BaseAddress + 0x33C84B, 1), 4)[0];
+
+            /*
+            CamFlags = (int)Types.CamMoveFlags.RETURN_TO_MIDDLE
+                + (int)Types.CamMoveFlags.ZOOMED_OUT
+                + (int)Types.CamMoveFlags.ROTATE_RIGHT
+                + (int)Types.CamMoveFlags.ROTATE_LEFT
+                + (int)Types.CamMoveFlags.ENTERED_ROTATE_SURFACE
+                + (int)Types.CamMoveFlags.METAL_BELOW_WATER
+                + (int)Types.CamMoveFlags.FIX_IN_PLACE
+                + (int)Types.CamMoveFlags.UNKNOWN_8
+                + (int)Types.CamMoveFlags.CAM_MOVING_INTO_MODE
+                + (int)Types.CamMoveFlags.STARTED_EXITING_C_UP
+                + (int)Types.CamMoveFlags.UNKNOWN_11
+                + (int)Types.CamMoveFlags.INIT_CAMERA
+                + (int)Types.CamMoveFlags.ALREADY_ZOOMED_OUT
+                + (int)Types.CamMoveFlags.C_UP_MODE
+                + (int)Types.CamMoveFlags.SUBMERGED
+                + (int)Types.CamMoveFlags.PAUSE_SCREEN;
+            */
         }
         #endregion
 
@@ -251,7 +263,7 @@ namespace LibV64Core
         public static string ColorCodeToGameShark(ColorCode colorCode)
         {
             if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
-                return null;
+                return "";
 
             string gameshark = "8107EC40 " + colorCode.Shirt.Main.R.ToString("X2") + colorCode.Shirt.Main.G.ToString("X2") + "\n";
             gameshark += "8107EC42 " + colorCode.Shirt.Main.B.ToString("X2") + "00\n";
@@ -276,10 +288,30 @@ namespace LibV64Core
             gameshark += "8107ECA0 " + colorCode.Hair.Main.R.ToString("X2") + colorCode.Hair.Main.G.ToString("X2") + "\n";
             gameshark += "8107ECA2 " + colorCode.Hair.Main.B.ToString("X2") + "00\n";
             gameshark += "8107EC98 " + colorCode.Hair.Shading.R.ToString("X2") + colorCode.Hair.Shading.G.ToString("X2") + "\n";
-            gameshark += "8107EC9A " + colorCode.Hair.Shading.B.ToString("X2") + "00\n";
+            gameshark += "8107EC9A " + colorCode.Hair.Shading.B.ToString("X2") + "00";
 
             return gameshark;
         }
         #endregion
+
+        /// <summary>
+        /// The main update function - should be called in a loop
+        /// </summary>
+        public static void CoreUpdate()
+        {
+            CamFlags = BitConverter.ToUInt16(Memory.ReadBytes(Memory.BaseAddress + 0x33C84A, 2));
+
+            // If the camera contains 0x80 (the pause movement flag), the camera is already frozen
+            CameraFrozen = ((Types.CamMoveFlags)CamFlags).HasFlag(Types.CamMoveFlags.PAUSE_SCREEN);
+
+            if (CameraFrozen) {
+                // Prevent the freeze camera from getting stuck
+                if (((Types.CamMoveFlags)CamFlags).HasFlag(Types.CamMoveFlags.STARTED_EXITING_C_UP)) {
+                    Memory.WriteBytes(Memory.BaseAddress + 0x33C848 + 3, new byte[] { 0x80 });
+                }
+                // Re-align our movement perpendicular
+                Memory.WriteBytes(Memory.BaseAddress + 0x33C77C + 3, new byte[] { 0x02 });
+            }
+        }
     }
 }
