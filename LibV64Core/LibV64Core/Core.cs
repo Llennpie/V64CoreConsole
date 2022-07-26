@@ -158,6 +158,39 @@ namespace LibV64Core
         }
 
         /// <summary>
+        /// Resets all colors back to default.
+        /// </summary>
+        public static void ResetColorCode()
+        {
+            ColorCode defaultColorCode = GameSharkToColorCode("8107EC40 FF00\n" +  // Default color code
+                                                              "8107EC42 0000\n" +
+                                                              "8107EC38 7F00\n" +
+                                                              "8107EC3A 0000\n" +
+                                                              "8107EC28 0000\n" +
+                                                              "8107EC2A FF00\n" +
+                                                              "8107EC20 0000\n" +
+                                                              "8107EC22 7F00\n" +
+                                                              "8107EC58 FFFF\n" +
+                                                              "8107EC5A FF00\n" +
+                                                              "8107EC50 7F7F\n" +
+                                                              "8107EC52 7F00\n" +
+                                                              "8107EC70 721C\n" +
+                                                              "8107EC72 0E00\n" +
+                                                              "8107EC68 390E\n" +
+                                                              "8107EC6A 0700\n" +
+                                                              "8107EC88 FEC1\n" +
+                                                              "8107EC8A 7900\n" +
+                                                              "8107EC80 7F60\n" +
+                                                              "8107EC82 3C00\n" +
+                                                              "8107ECA0 7306\n" +
+                                                              "8107ECA2 0000\n" +
+                                                              "8107EC98 3903\n" +
+                                                              "8107EC9A 0000");
+
+            ApplyColorCode(defaultColorCode);
+        }
+
+        /// <summary>
         /// Converts a GameShark color code string to a ColorCode object.
         /// </summary>
         /// <param name="gameshark"></param>
