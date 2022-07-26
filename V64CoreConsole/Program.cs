@@ -26,9 +26,6 @@ namespace V64CoreConsole
             Core.FixResetBodyState();
             Console.WriteLine("[C] Applied BodyState Patch");
 
-            // Misc. Setup
-            Core.CurrentColorCode = Core.LoadColorCodeFromGame();
-
             // Run console stuff
             RunCommandLoop();
         }
