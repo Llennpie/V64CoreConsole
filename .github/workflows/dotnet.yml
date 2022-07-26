@@ -28,5 +28,9 @@ jobs:
     - name: Upload Content
       uses: actions/upload-artifact@v2
       with:
-        name: v64cc-${{ github.sha }}
-        path: /home/runner/work/V64CoreConsole/V64CoreConsole/release/
+        name: v64cc-${{ github.run_number }}
+        path: |
+          /home/runner/work/V64CoreConsole/V64CoreConsole/release/V64CoreConsole.exe
+          /home/runner/work/V64CoreConsole/V64CoreConsole/release/V64CoreConsole.dll
+          /home/runner/work/V64CoreConsole/V64CoreConsole/release/LibV64Core.dll
+          /home/runner/work/V64CoreConsole/V64CoreConsole/release/V64CoreConsole.runtimeconfig.json
