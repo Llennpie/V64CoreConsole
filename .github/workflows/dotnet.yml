@@ -27,4 +27,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: v64cc-${{ github.run_number }}
-        path: /home/runner/work/V64CoreConsole/V64CoreConsole/V64CoreConsole/bin/Release/net6.0-windows/
+        path: D:\a\V64CoreConsole\V64CoreConsole\V64CoreConsole\bin\Release\net6.0-windows\
