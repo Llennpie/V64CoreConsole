@@ -24,13 +24,9 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
-      run: dotnet publish V64CoreConsole/V64CoreConsole.csproj -c Release -o release --nologo
+      run: dotnet publish V64CoreConsole/V64CoreConsole.csproj /p:DebugType=None /p:DebugSymbols=false -c Release -o release --nologo
     - name: Upload Content
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: v64cc-${{ github.run_number }}
-        path: |
-          /home/runner/work/V64CoreConsole/V64CoreConsole/release/V64CoreConsole.exe
-          /home/runner/work/V64CoreConsole/V64CoreConsole/release/V64CoreConsole.dll
-          /home/runner/work/V64CoreConsole/V64CoreConsole/release/LibV64Core.dll
-          /home/runner/work/V64CoreConsole/V64CoreConsole/release/V64CoreConsole.runtimeconfig.json
+        path: /home/runner/work/V64CoreConsole/V64CoreConsole/release/
