@@ -248,28 +248,5 @@ namespace LibV64Core
             return gameshark;
         }
         #endregion
-
-        /// <summary>
-        /// Main core update loop.
-        /// </summary>
-        public static void CoreUpdate()
-        {
-            if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
-                return;
-
-            // Previous values
-
-            int freezeCameraData = Memory.SwapEndian(Memory.ReadBytes(Memory.BaseAddress + 0x33C84B, 1), 4)[0];
-            CameraFrozen = (freezeCameraData & 128) == 128;
-
-            // Prevent C-Up from locking the freeze camera
-
-            if (freezeCameraData == 162)
-            {
-                byte[] writeCUpData = BitConverter.GetBytes(freezeCameraData - 34);
-                Memory.WriteBytes(Memory.BaseAddress + 0x33C84B, writeCUpData);
-                Console.WriteLine("help");
-            }
-        }
     }
 }
