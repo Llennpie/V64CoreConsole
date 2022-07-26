@@ -1,11 +1,14 @@
 # V64CoreConsole
 
-- **V64CoreConsole** is a C# console application equipped with *Super Mario 64* machinima creation tools.
+[![.NET](https://github.com/Llennpie/V64CoreConsole/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Llennpie/V64CoreConsole/actions/workflows/dotnet.yml)
+
+- **V64CoreConsole** is a *Windows* C# console application equipped with *Super Mario 64* machinima creation tools.
 - This project was solely created to show off [LibV64Core](https://github.com/Llennpie/LibV64Core).
+- CI builds can be found on the [actions](https://github.com/Llennpie/V64CoreConsole/actions) page.
 
 ## Installation
 
-You can download the latest version of **V64CoreConsole** from the [releases](https://github.com/Llennpie/V64CoreConsole/releases) page.
+The latest **stable** version of **V64CoreConsole** can be downloaded from the [releases](https://github.com/Llennpie/V64CoreConsole/releases) page.
 
 ### *OR*
 
@@ -17,7 +20,11 @@ You can download the latest version of **V64CoreConsole** from the [releases](ht
 
 ---
 
-![Screenshot](https://media.discordapp.net/attachments/814630624920076298/965060514851991602/unknown.png?width=960&height=526)
+![Screenshot](https://media.discordapp.net/attachments/863117129347891251/1001561950767030352/unknown.png?width=960&height=627)
+
+---
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J05B5WR)
 
 ## Credits
 
