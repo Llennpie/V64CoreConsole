@@ -20,13 +20,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: Publish
-      run: dotnet publish V64CoreConsole/V64CoreConsole.csproj /p:DebugType=None /p:DebugSymbols=false -c Release -o release --nologo
     - name: Upload Content
       uses: actions/upload-artifact@v3
       with:
         name: v64cc-${{ github.run_number }}
-        path: /home/runner/work/V64CoreConsole/V64CoreConsole/release/
+        path: /home/runner/work/V64CoreConsole/V64CoreConsole/bin/Release/net6.0/
