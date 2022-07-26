@@ -23,3 +23,10 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish V64CoreConsole/V64CoreConsole.csproj -c Release -o release --nologo
+    - name: Upload Content
+      uses: actions/upload-artifact@v2
+      with:
+        name: v64cc-${{ github.sha }}
+        path: /home/runner/work/V64CoreConsole/V64CoreConsole/release/
