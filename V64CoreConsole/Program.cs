@@ -26,6 +26,9 @@ namespace V64CoreConsole
             Core.FixResetBodyState();
             Console.WriteLine("[C] Applied BodyState Patch");
 
+            // Misc. Setup
+            Core.CurrentColorCode = Core.LoadColorCodeFromGame();
+
             // Run console stuff
             RunCommandLoop();
         }
@@ -139,15 +142,19 @@ namespace V64CoreConsole
                         break;
 
                     case "loadgsfile":
+                        // Cancel if "colorcodes" folder does not exist
+                        if (!System.IO.Directory.Exists("colorcodes"))
+                            Console.WriteLine("ERROR: \"colorcodes\\\" folder does not exist.");
+                            break;
+
                         Console.Write("Enter GS name: ");
                         string gsName = Console.ReadLine();
 
+                        // Get GameShark text from file
                         string gameshark = System.IO.File.ReadAllText("colorcodes\\" + gsName + ".gs");
                         if (gameshark == null)
-                        {
                             Console.WriteLine("ERROR: File \"colorcodes\\" + gsName + ".gs\" does not exist.");
                             break;
-                        }
 
                         Types.ColorCode colorCode = Core.GameSharkToColorCode(gameshark);
                         Core.ApplyColorCode(colorCode);
@@ -156,11 +163,18 @@ namespace V64CoreConsole
                         break;
 
                     case "savegsfile":
+                        // Cancel if "colorcodes" folder does not exist
+                        if (!System.IO.Directory.Exists("colorcodes"))
+                            Console.WriteLine("ERROR: \"colorcodes\\\" folder does not exist.");
+                            break;
+
                         Console.Write("Enter GS name: ");
                         string gsName1 = Console.ReadLine();
 
                         Types.ColorCode colorCode2 = Core.LoadColorCodeFromGame();
                         string gameshark2 = Core.ColorCodeToGameShark(colorCode2);
+
+                        // Write GameShark text to file
                         System.IO.File.WriteAllText("colorcodes\\" + gsName1 + ".gs", gameshark2);
 
                         Console.WriteLine("Saved to \"colorcodes\\" + gsName1 + ".gs\"");
