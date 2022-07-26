@@ -10,16 +10,16 @@ namespace V64CoreConsole
 {
     class Program
     {
+        private static string? command;
+
         static void Main(string[] args)
         {
             Console.WriteLine("Initializing LibV64Core\n");
 
             // Initialize LibV64Core
             Process[] emulatorProcesses = Memory.GetEmulatorProcesses("Project64");
-            if (emulatorProcesses.Length == 0)
-                throw new InvalidOperationException("Could not find active Project64 process");
             Memory.HookEmulatorProcess(emulatorProcesses[0]);
-            Console.WriteLine("[M] Found Project64");
+            Console.WriteLine(emulatorProcesses[0].MainWindowTitle);
             Memory.FindBaseAddress();
             Console.WriteLine("[M] Found BaseAddress");
 
@@ -31,34 +31,43 @@ namespace V64CoreConsole
 
             // Run console stuff
             Commands.CreateWorkspace();
+            Console.WriteLine("\nWelcome to V64CoreConsole. Type \"help\" for list of commands.\n");
+
+            var x = Task.Run(() => Update());
+
             RunCommandLoop();
         }
 
-        public static void RunCommandLoop()
+        private static Task Update()
         {
-            Console.WriteLine("\nWelcome to V64CoreConsole. Type \"help\" for list of commands.\n");
-
-            string command;
-            bool quitNow = false;
-            while (!quitNow)
+            while (command != "")
             {
-                command = Console.ReadLine();
+                Thread.Sleep(500);
+                Core.CoreUpdate();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private static void RunCommandLoop()
+        {
+            while (command != "")
+            {
+                Console.Write("> ");
+                command = Console.ReadLine()?.ToLower();
                 switch (command)
                 {
                     case "help":
-                        Console.WriteLine("\nV64CoreConsole\n\n" +
+                        Console.WriteLine("\n" +
                             "help - Display this message\n" +
                             "quit - Safely exits the application\n" +
                             "freeze - Toggles camera freeze/unfreeze\n" +
+                            "resetgs - Resets the in-game color code\n" +
                             "getgs - Displays the current loaded color code\n" +
                             "loadgsfile - Loads a color code from a file (colorcodes\\)\n" +
                             "savegsfile - Saves a color code to a file (colorcodes\\)\n" +
-                            "eyeswap - Changes Mario's eye state\n" +
-                            "handswap - Changes Mario's hand state");
-                        break;
-
-                    case "quit":
-                        quitNow = true;
+                            "eyeswap - Changes the current eye state\n" +
+                            "handswap - Changes the current hand state");
                         break;
 
                     case "freeze":
@@ -66,46 +75,52 @@ namespace V64CoreConsole
                         break;
 
                     case "eyeswap":
-                        Console.WriteLine("(blink, open, half, closed, left, right, up, down, dead)\nEnter one of the above: ");
-                        string chosenEyeName = Console.ReadLine();
-                        Commands.EyeSwap(chosenEyeName);
+                        Console.WriteLine("(blink, open, half, closed, left, right, up, down, dead)");
+                        Console.Write("Enter one of the above > ");
+                        string? chosenEyeName = Console.ReadLine();
+                        if (chosenEyeName != null)
+                            Commands.EyeSwap(chosenEyeName);
                         break;
 
                     case "handswap":
-                        Console.WriteLine("(fists, open, peace, cap, wingcap, right)\nEnter one of the above: ");
-                        string chosenHandName = Console.ReadLine();
-                        Commands.HandSwap(chosenHandName);
+                        Console.WriteLine("(fists, open, peace, cap, wingcap, right)");
+                        Console.Write("Enter one of the above > ");
+                        string? chosenHandName = Console.ReadLine();
+                        if (chosenHandName != null)
+                            Commands.HandSwap(chosenHandName);
                         break;
 
                     case "loadgsfile":
-                        Console.Write("Enter GS name: ");
-                        string gsName = Console.ReadLine();
-
-                        // Get GameShark text from file
-                        string gameshark = System.IO.File.ReadAllText("colorcodes\\" + gsName + ".gs");
-                        if (gameshark == null)
+                        Console.Write("Enter GS name > ");
+                        string? loadGsName = Console.ReadLine();
+                        if (loadGsName != null)
                         {
-                            Console.WriteLine("ERROR: File \"colorcodes\\" + gsName + ".gs\" does not exist.");
-                            break;
+                            // Get GameShark text from file
+                            string loadGameshark = System.IO.File.ReadAllText("colorcodes\\" + loadGsName + ".gs");
+                            if (loadGameshark == null)
+                            {
+                                Console.WriteLine("ERROR: File \"colorcodes\\" + loadGsName + ".gs\" does not exist.");
+                                break;
+                            }
+
+                            Types.ColorCode colorCode = Core.GameSharkToColorCode(loadGameshark);
+                            Core.ApplyColorCode(colorCode);
+
+                            Console.WriteLine("[C] Applied " + loadGsName);
                         }
-
-                        Types.ColorCode colorCode = Core.GameSharkToColorCode(gameshark);
-                        Core.ApplyColorCode(colorCode);
-
-                        Console.WriteLine("[C] Applied " + gsName);
                         break;
 
                     case "savegsfile":
-                        Console.Write("Enter GS name: ");
-                        string gsName1 = Console.ReadLine();
+                        Console.Write("Enter GS name > ");
+                        string? saveGsName = Console.ReadLine();
 
-                        Types.ColorCode colorCode2 = Core.LoadColorCodeFromGame();
-                        string gameshark2 = Core.ColorCodeToGameShark(colorCode2);
+                        Types.ColorCode saveColorCode = Core.LoadColorCodeFromGame();
+                        string saveGameshark = Core.ColorCodeToGameShark(saveColorCode);
 
                         // Write GameShark text to file
-                        System.IO.File.WriteAllText("colorcodes\\" + gsName1 + ".gs", gameshark2);
+                        System.IO.File.WriteAllText("colorcodes\\" + saveGsName + ".gs", saveGameshark);
 
-                        Console.WriteLine("Saved to \"colorcodes\\" + gsName1 + ".gs\"");
+                        Console.WriteLine("Saved to \"colorcodes\\" + saveGsName + ".gs\"");
                         break;
 
                     case "resetgs":
@@ -114,9 +129,9 @@ namespace V64CoreConsole
                         break;
 
                     case "getgs":
-                        Types.ColorCode colorCode3 = Core.LoadColorCodeFromGame();
-                        string gameshark3 = Core.ColorCodeToGameShark(colorCode3);
-                        Console.WriteLine(gameshark3);
+                        Types.ColorCode getColorCode = Core.LoadColorCodeFromGame();
+                        string getGameshark = Core.ColorCodeToGameShark(getColorCode);
+                        Console.WriteLine(getGameshark);
                         break;
 
                     default:
