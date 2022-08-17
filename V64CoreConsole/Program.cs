@@ -67,7 +67,8 @@ namespace V64CoreConsole
                             "loadgsfile - Loads a color code from a file (colorcodes\\)\n" +
                             "savegsfile - Saves a color code to a file (colorcodes\\)\n" +
                             "eyeswap - Changes the current eye state\n" +
-                            "handswap - Changes the current hand state");
+                            "handswap - Changes the current hand state\n" +
+                            "powerswap - Changes the current powerup");
                         break;
 
                     case "freeze":
@@ -88,6 +89,14 @@ namespace V64CoreConsole
                         string? chosenHandName = Console.ReadLine();
                         if (chosenHandName != null)
                             Commands.HandSwap(chosenHandName);
+                        break;
+
+                    case "powerswap":
+                        Console.WriteLine("(default, vanish, metal)");
+                        Console.Write("Enter one of the above > ");
+                        string? chosenPowerUpName = Console.ReadLine();
+                        if (chosenPowerUpName != null)
+                            Commands.PowerUpSwap(chosenPowerUpName);
                         break;
 
                     case "loadgsfile":

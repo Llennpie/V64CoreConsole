@@ -107,6 +107,25 @@ namespace V64CoreConsole
                     break;
             }
         }
+
+        public static void PowerUpSwap(string chosenPowerUpName)
+        {
+            switch (chosenPowerUpName)
+            {
+                case "default":
+                    Core.SetPowerUpState(Types.PowerUpState.DEFAULT);
+                    break;
+                case "vanish":
+                    Core.SetPowerUpState(Types.PowerUpState.VANISH);
+                    break;
+                case "metal":
+                    Core.SetPowerUpState(Types.PowerUpState.METAL);
+                    break;
+                default:
+                    Core.SetPowerUpState(Types.PowerUpState.DEFAULT);
+                    break;
+            }
+        }
         #endregion
     }
 }
