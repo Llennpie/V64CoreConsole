@@ -37,9 +37,9 @@ namespace LibV64Core
         public enum HandState {
             FISTS, OPEN, PEACE, WITH_CAP, WITH_WING_CAP, RIGHT_OPEN
         }
-        public enum PowerupState
+        public enum PowerUpState
         {
-            DEFAULT, VANISH, METAL,
+            DEFAULT, VANISH, METAL, METAL_VANISH
         }
         #endregion
 

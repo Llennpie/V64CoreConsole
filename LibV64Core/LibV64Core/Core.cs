@@ -78,11 +78,26 @@ namespace LibV64Core
             if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
                 return;
 
-            Memory.WriteBytes(Memory.BaseAddress + 0x254338, new byte[88]);
+            Memory.WriteBytes(Memory.BaseAddress + 0x254344, new byte[28]);
+            Memory.WriteBytes(Memory.BaseAddress + 0x254361 + 1, new byte[] { 0xAF });
+            Memory.WriteBytes(Memory.BaseAddress + 0x254365 + 1, new byte[] { 0xE0 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x254369 + 1, new byte[] { 0xB8 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x25436C + 3, new byte[] { 0xA3 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x25436D + 1, new byte[] { 0x00 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x254371 + 1, new byte[] { 0x99 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x254378 + 3, new byte[] { 0x03 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x254379 + 1, new byte[] { 0x21 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x25437A + 3, new byte[] { 0x40 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x25437C + 3, new byte[] { 0xAC });
+            Memory.WriteBytes(Memory.BaseAddress + 0x25437D + 1, new byte[] { 0x88 });
+
+            // Old Zero-Fill
+            //Memory.WriteBytes(Memory.BaseAddress + 0x254338, new byte[88]);
         }
 
         public static EyeState CurrentEyeState;
         public static HandState CurrentHandState;
+        public static PowerUpState CurrentPowerUpState;
 
         /// <summary>
         /// Sets the current eye state.
@@ -113,6 +128,37 @@ namespace LibV64Core
 
             // SetHandState sometimes overrides the eye state, so we set it once more.
             SetEyeState(CurrentEyeState);
+        }
+
+        /// <summary>
+        /// Sets the current powerup state.
+        /// </summary>
+        /// <param name="powerUpState"></param>
+        public static void SetPowerUpState(PowerUpState powerUpState)
+        {
+            if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
+                return;
+
+            // Don't use flags or state data, set to exact value
+            switch(powerUpState)
+            {
+                case PowerUpState.METAL:
+                    Memory.WriteBytes(Memory.BaseAddress + 0x33B177 - 3, new byte[] { 0x14 });
+                    break;
+
+                case PowerUpState.VANISH:
+                    Memory.WriteBytes(Memory.BaseAddress + 0x33B177 - 3, new byte[] { 0x12 });
+                    break;
+
+                default:
+                    Memory.WriteBytes(Memory.BaseAddress + 0x33B177 - 3, new byte[] { 0x10 });
+                    break;
+            }
+
+            CurrentPowerUpState = powerUpState;
+
+            // SetPowerUpState sometimes overrides the hand state, so we set it once more.
+            SetHandState(CurrentHandState);
         }
         #endregion
 
