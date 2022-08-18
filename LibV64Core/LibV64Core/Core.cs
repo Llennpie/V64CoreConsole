@@ -95,9 +95,9 @@ namespace LibV64Core
             //Memory.WriteBytes(Memory.BaseAddress + 0x254338, new byte[88]);
         }
 
-        public static EyeState CurrentEyeState;
-        public static HandState CurrentHandState;
-        public static PowerUpState CurrentPowerUpState;
+        public static EyeState CurrentEyeState = 0;
+        public static HandState CurrentHandState = 0;
+        public static PowerUpState CurrentPowerUpState = 0;
 
         /// <summary>
         /// Sets the current eye state.
@@ -148,6 +148,10 @@ namespace LibV64Core
 
                 case PowerUpState.VANISH:
                     Memory.WriteBytes(Memory.BaseAddress + 0x33B177 - 3, new byte[] { 0x12 });
+                    break;
+
+                case PowerUpState.METAL_VANISH:
+                    Memory.WriteBytes(Memory.BaseAddress + 0x33B177 - 3, new byte[] { 0x16 });
                     break;
 
                 default:

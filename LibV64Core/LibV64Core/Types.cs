@@ -65,5 +65,27 @@ namespace LibV64Core
             public int B;
         }
         #endregion
+
+        #region Controller
+
+        public enum ButtonFlags : uint
+        {
+            A_BUTTON        = 0x8000,
+            B_BUTTON	    = 0x4000,
+            L_TRIG		    = 0x0020,
+            R_TRIG		    = 0x0010,
+            Z_TRIG		    = 0x2000,
+            START_BUTTON	= 0x1000,
+            U_JPAD		    = 0x0800,
+            L_JPAD		    = 0x0200,
+            R_JPAD		    = 0x0100,
+            D_JPAD		    = 0x0400,
+            U_CBUTTONS	    = 0x0008,
+            L_CBUTTONS	    = 0x0004,
+            R_CBUTTONS	    = 0x0002,
+            D_CBUTTONS	    = 0x0001
+        }
+
+        #endregion
     }
 }

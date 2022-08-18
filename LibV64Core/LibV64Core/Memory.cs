@@ -48,16 +48,9 @@ namespace LibV64Core
         public static Process[] GetEmulatorProcesses(string processName = "Project64")
         {
             // To account for multiple emulator processes, we store them in an array.
+            // You could add an exception here if none were found, but I'm leaving that up to the frontend.
             Process[] emulators = Process.GetProcessesByName(processName);
-
-            if (emulators == null || emulators.Length == 0)
-            {
-                throw new InvalidOperationException("ERROR: Could not find active Project64 process");
-            }
-            else
-            {
-                return emulators;
-            }
+            return emulators;
         }
 
         /// <summary>
@@ -66,11 +59,11 @@ namespace LibV64Core
         /// <param name="process"></param>
         public static void HookEmulatorProcess(Process? process)
         {
-            if (process != null)
-            {
-                emulatorProcess = process;
-                emulatorProcessHandle = process.Handle;
-            }
+            if (process == null)
+                return;
+
+            emulatorProcess = process;
+            emulatorProcessHandle = process.Handle;
         }
 
         /// <summary>
