@@ -121,6 +121,9 @@ namespace V64CoreConsole
                 case "metal":
                     Core.SetPowerUpState(Types.PowerUpState.METAL);
                     break;
+                case "metalvanish":
+                    Core.SetPowerUpState(Types.PowerUpState.METAL_VANISH);
+                    break;
                 default:
                     Core.SetPowerUpState(Types.PowerUpState.DEFAULT);
                     break;
