@@ -8,6 +8,11 @@ namespace LibV64Core
 {
     public class Types
     {
+        public enum GameState
+        {
+            Vanilla, Decomp
+        }
+
         #region Camera
         public enum CamMoveFlags : uint
         {
@@ -46,6 +51,7 @@ namespace LibV64Core
         #region Color Codes
         public struct ColorCode
         {
+            public string Name;
             public ColorPart Shirt;
             public ColorPart Overalls;
             public ColorPart Gloves;

@@ -49,5 +49,21 @@ namespace LibV64Core
             return light;
         }
         #endregion
+
+        /// <summary>
+        /// Transforms a hex string into a byte array.
+        /// </summary>
+        /// <param name="hex">Hexadecimal string</param>
+        /// <returns>A byte array from the string provided</returns>
+        public static byte[] StringToByteArray(string hex)
+        {
+            // Remove spaces
+            hex = hex.Replace(" ", String.Empty);
+
+            return Enumerable.Range(0, hex.Length)
+                .Where(x => x % 2 == 0)
+                .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                .ToArray();
+        }
     }
 }

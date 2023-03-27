@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LibV64Core;
+using static System.Net.Mime.MediaTypeNames;
+using System.Reflection;
 
 namespace V64CoreConsole
 {
     class Program
     {
         private static string? command;
+        private static string linkerMap = "sm64.us.map";
 
         static void Main(string[] args)
         {
@@ -25,14 +28,24 @@ namespace V64CoreConsole
 
             Memory.HookEmulatorProcess(emulatorProcesses[0]);
             Console.WriteLine(emulatorProcesses[0].MainWindowTitle);
-            Memory.FindBaseAddress();
-            Console.WriteLine("[M] Found BaseAddress");
+            Memory.SetupCore();
+
+            // Decomp ROM
+            if (Core.State == Types.GameState.Decomp)
+            {
+                Console.WriteLine("\n==========\n[M] Decomp ROM Detected\nPlease specify a linker MAP file (or leave blank for default):");
+                Console.Write("> ");
+                string? path = Console.ReadLine();
+                if (string.IsNullOrEmpty(path))
+                    path = "sm64.us.map";
+
+                Memory.LoadLinkerMap(path);
+                Console.WriteLine("==========");
+            }
 
             // Apply patches
             Core.FixCameraZoomOut();
-            Console.WriteLine("[C] Applied Zoom Fix Patch");
             Core.FixResetBodyState();
-            Console.WriteLine("[C] Applied BodyState Patch");
 
             // Run console stuff
             Commands.CreateWorkspace();
@@ -44,6 +57,8 @@ namespace V64CoreConsole
             RunCommandLoop();
         }
 
+        static int cycleEye = 0;
+
         private static Task Update()
         {
             while (command != "")
@@ -54,6 +69,18 @@ namespace V64CoreConsole
                 // Freeze camera with D-Pad Up + L
                 if (Controller.GetButton(Types.ButtonFlags.U_JPAD | Types.ButtonFlags.L_TRIG))
                     Core.ToggleFreezeCamera();
+
+                // Toggle HUD with D-Pad Down + L
+                if (Controller.GetButton(Types.ButtonFlags.D_JPAD | Types.ButtonFlags.L_TRIG))
+                    Core.HUD = !Core.HUD;
+
+                // Cycle eyes with D-Pad Left + L
+                if (Controller.GetButton(Types.ButtonFlags.L_JPAD | Types.ButtonFlags.L_TRIG)) {
+                    if (cycleEye < 8) cycleEye++;
+                    else cycleEye = 0;
+
+                    Core.SetEyeState((Types.EyeState)cycleEye);
+                }
             }
 
             return Task.CompletedTask;
@@ -84,7 +111,9 @@ namespace V64CoreConsole
                             "savegsfile - Saves a color code to a file (colorcodes\\)\n" +
                             "eyeswap - Changes the current eye state\n" +
                             "handswap - Changes the current hand state\n" +
-                            "powerswap - Changes the current powerup");
+                            "powerswap - Changes the current powerup\n" +
+                            "hud - Toggles the HUD\n" +
+                            "shadow - Toggles the player shadow");
                         break;
 
                     case "freeze":
@@ -129,9 +158,8 @@ namespace V64CoreConsole
                             }
 
                             Types.ColorCode colorCode = Core.GameSharkToColorCode(loadGameshark);
+                            colorCode.Name = loadGsName;
                             Core.ApplyColorCode(colorCode);
-
-                            Console.WriteLine("[C] Applied " + loadGsName);
                         }
                         break;
 
@@ -150,13 +178,20 @@ namespace V64CoreConsole
 
                     case "resetgs":
                         Core.ResetColorCode();
-                        Console.WriteLine("[C] Reset ColorCode");
                         break;
 
                     case "getgs":
                         Types.ColorCode getColorCode = Core.LoadColorCodeFromGame();
                         string getGameshark = Core.ColorCodeToGameShark(getColorCode);
                         Console.WriteLine(getGameshark);
+                        break;
+
+                    case "hud":
+                        Core.HUD = !Core.HUD;
+                        break;
+
+                    case "shadow":
+                        Core.Shadow = !Core.Shadow;
                         break;
 
                     default:

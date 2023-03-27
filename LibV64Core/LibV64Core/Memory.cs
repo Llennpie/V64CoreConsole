@@ -10,6 +10,8 @@ namespace LibV64Core
 {
     public class Memory
     {
+        public static Linker.Map Map;
+
         #region DllImports
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
@@ -38,6 +40,15 @@ namespace LibV64Core
                     return false;
                 }
             }
+        }
+
+        public static bool HasExitedGame()
+        {
+            FindBaseAddress();
+            if (BaseAddress == 0)
+                return true;
+
+            return false;
         }
 
         #region Processes
@@ -77,6 +88,48 @@ namespace LibV64Core
         #endregion
 
         #region Reading/Writing
+        /// <summary>
+        /// Finds the in-game base address and sets it globally (BaseAddress).
+        /// </summary>
+        /// <returns></returns>
+        public static void FindBaseAddress()
+        {
+            long start = 0x20000000;
+            long stop = 0xF0000000;
+            long step = 0x10000;
+
+            uint value;
+
+            // Checks if our current BaseAddress is still valid.
+            if (BaseAddress > 0)
+            {
+                value = BitConverter.ToUInt32(ReadBytes(BaseAddress, sizeof(uint)), 0);
+                if (value == 0x3C1A8032) { Core.State = Types.GameState.Vanilla; return; }
+                if (value == 0x3C1A8018) { Core.State = Types.GameState.Decomp; return; }
+            }
+
+            // We begin searching for the BaseAddress. This may cause CPU issues on lower-end devices.
+            for (long scanAddress = start; scanAddress < stop - step; scanAddress += step)
+            {
+                value = BitConverter.ToUInt32(ReadBytes(scanAddress, sizeof(uint)), 0);
+                if (value == 0x3C1A8032)
+                {
+                    BaseAddress = scanAddress;
+                    Core.State = Types.GameState.Vanilla;
+                    return;
+                }
+                if (value == 0x3C1A8018)
+                {
+                    BaseAddress = scanAddress;
+                    Core.State = Types.GameState.Decomp;
+                    return;
+                }
+            }
+
+            // If nothing is found, set the BaseAddress to 0.
+            BaseAddress = 0;
+        }
+
         /// <summary>
         /// Returns a byte array at a given address.
         /// </summary>
@@ -132,39 +185,26 @@ namespace LibV64Core
         }
         #endregion
 
-        /// <summary>
-        /// Finds the in-game base address and sets it globally (BaseAddress).
-        /// </summary>
-        /// <returns></returns>
-        public static void FindBaseAddress()
+        public static void SetupCore()
         {
-            long start = 0x20000000;
-            long stop = 0xF0000000;
-            long step = 0x10000;
+            FindBaseAddress();
+            if (BaseAddress == 0)
+                throw new Exception("ERROR: Could not find BaseAddress");
+            else
+                Console.WriteLine("[M] Found BaseAddress");
 
-            uint value;
+            LoadLinkerMap("sm64.us.map");
+        }
 
-            // Checks if our current BaseAddress is still valid.
-            if (BaseAddress > 0)
-            {
-                value = BitConverter.ToUInt32(ReadBytes(BaseAddress, sizeof(uint)), 0);
-                if (value == 0x3C1A8032)
-                    return;
-            }
+        public static void LoadLinkerMap(string pathToLinker)
+        {
+            // Remove possible quotations on path
+            pathToLinker = pathToLinker.Replace("\"", "");
 
-            // We begin searching for the BaseAddress. This may cause CPU issues on lower-end devices.
-            for (long scanAddress = start; scanAddress < stop - step; scanAddress += step)
-            {
-                value = BitConverter.ToUInt32(ReadBytes(scanAddress, sizeof(uint)), 0);
-                if (value == 0x3C1A8032)
-                {
-                    BaseAddress = scanAddress;
-                    return;
-                }
-            }
+            if (!File.Exists(pathToLinker))
+                throw new Exception("ERROR: Could not find linker map \"" + pathToLinker + "\"");
 
-            // If nothing is found, set the BaseAddress to 0.
-            BaseAddress = 0;
+            Map = new Linker.Map(pathToLinker);
         }
     }
 }

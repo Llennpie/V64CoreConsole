@@ -9,6 +9,15 @@ namespace LibV64Core
 {
     public class Core
     {
+        public static GameState State;
+
+        // Quick Options
+
+        /// <summary>The in-game HUD visibility.</summary>
+        public static bool HUD = false;
+        /// <summary>The in-game player's shadow visibility.</summary>
+        public static bool Shadow = true;
+
         #region Camera
         public static bool CameraFrozen;
         private static int CamFlags;
@@ -24,13 +33,13 @@ namespace LibV64Core
             if (CameraFrozen)
             {
                 // Unfreeze the camera
-                Memory.WriteBytes(Memory.BaseAddress + 0x33C848 + 3, new byte[] {0x01});
+                Memory.WriteBytes(Memory.BaseAddress + Memory.Map.CameraMovementFlags + 3, new byte[] {0x01});
                 Console.WriteLine("[C] Camera Unfrozen");
             }
             else
             {
                 // Freeze the camera
-                Memory.WriteBytes(Memory.BaseAddress + 0x33C848 + 3, new byte[] { 0x80 });
+                Memory.WriteBytes(Memory.BaseAddress + Memory.Map.CameraMovementFlags + 3, new byte[] { 0x80 });
                 Console.WriteLine("[C] Camera Frozen");
             }
         }
@@ -43,10 +52,10 @@ namespace LibV64Core
             if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
                 return;
 
-            Memory.WriteBytes(Memory.BaseAddress + 0x32F870, new byte[20]);
+            Memory.WriteBytes(Memory.BaseAddress + Memory.Map.ZoomOutAreaMasks, new byte[20]);
 
             // Define movement flags
-            CamFlags = Memory.SwapEndian(Memory.ReadBytes(Memory.BaseAddress + 0x33C84B, 1), 4)[0];
+            CamFlags = Memory.SwapEndian(Memory.ReadBytes(Memory.BaseAddress + Memory.Map.CameraMovementFlags + 3, 1), 4)[0];
 
             /*
             CamFlags = (int)Types.CamMoveFlags.RETURN_TO_MIDDLE
@@ -66,33 +75,41 @@ namespace LibV64Core
                 + (int)Types.CamMoveFlags.SUBMERGED
                 + (int)Types.CamMoveFlags.PAUSE_SCREEN;
             */
+
+            Console.WriteLine("[C] Applied Zoom Fix Patch");
         }
         #endregion
 
         #region Mario States
         /// <summary>
-        /// Zero-fills the function "mario_reset_bodystate", allowing eye/hand/cap states to be manually overwritten.
+        /// Allows eye/hand/cap states to be manually overwritten.
         /// </summary>
         public static void FixResetBodyState()
         {
             if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
                 return;
 
-            Memory.WriteBytes(Memory.BaseAddress + 0x254344, new byte[28]);
-            Memory.WriteBytes(Memory.BaseAddress + 0x254361 + 1, new byte[] { 0xAF });
-            Memory.WriteBytes(Memory.BaseAddress + 0x254365 + 1, new byte[] { 0xE0 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x254369 + 1, new byte[] { 0xB8 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x25436C + 3, new byte[] { 0xA3 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x25436D + 1, new byte[] { 0x00 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x254371 + 1, new byte[] { 0x99 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x254378 + 3, new byte[] { 0x03 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x254379 + 1, new byte[] { 0x21 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x25437A + 3, new byte[] { 0x40 });
-            Memory.WriteBytes(Memory.BaseAddress + 0x25437C + 3, new byte[] { 0xAC });
-            Memory.WriteBytes(Memory.BaseAddress + 0x25437D + 1, new byte[] { 0x88 });
+            // Disable on Decomp
+            if (Core.State == GameState.Decomp) {
+                return;
+            }
+
+            // Rewrite the mario_reset_bodystate function
+            // This fix stops the game from resetting eye/hand/cap/power states each frame
+            string newBodyStateFunction =   "27BDFFF8 8C8E0098 AFAE0004 00000000" +
+                                            "00000000 00000000 00000000 00000000" +
+                                            "00000000 00000000 8FAF0004 A5E00008" +
+                                            "8FB80004 A3000007 8C990004 2401FFBF" +
+                                            "03216024 AC884004 10000001 00000000" +
+                                            "03E00008 27BD0008";
+
+            // Replace the function with our new one
+            Memory.WriteBytes(Memory.BaseAddress + Memory.Map.MarioResetBodystate, Utils.StringToByteArray(newBodyStateFunction), true);
 
             // Old Zero-Fill
             //Memory.WriteBytes(Memory.BaseAddress + 0x254338, new byte[88]);
+
+            Console.WriteLine("[C] Applied BodyState Patch");
         }
 
         public static EyeState CurrentEyeState = 0;
@@ -109,7 +126,7 @@ namespace LibV64Core
                 return;
 
             byte[] writeEyeStateData = BitConverter.GetBytes((int)eyeState);
-            Memory.WriteBytes(Memory.BaseAddress + 0x33B3B6, writeEyeStateData);
+            Memory.WriteBytes(Memory.BaseAddress + Memory.Map.BodyStates + 6, writeEyeStateData);
             CurrentEyeState = eyeState;
         }
 
@@ -123,7 +140,7 @@ namespace LibV64Core
                 return;
 
             byte[] writeHandStateData = BitConverter.GetBytes((int)handState);
-            Memory.WriteBytes(Memory.BaseAddress + 0x33B3B5, writeHandStateData);
+            Memory.WriteBytes(Memory.BaseAddress + Memory.Map.BodyStates + 5, writeHandStateData);
             CurrentHandState = handState;
 
             // SetHandState sometimes overrides the eye state, so we set it once more.
@@ -176,6 +193,12 @@ namespace LibV64Core
             if (!Memory.IsEmulatorOpen || Memory.BaseAddress == 0)
                 return;
 
+            // Disable on Decomp
+            if (Core.State == GameState.Decomp) {
+                Console.WriteLine("[C] This feature is only available on non-Decomp ROMs");
+                return;
+            }
+
             Utils.ApplyLightToAddress(0x07EC40, colorCode.Shirt.Main);
             Utils.ApplyLightToAddress(0x07EC38, colorCode.Shirt.Shading);
             Utils.ApplyLightToAddress(0x07EC28, colorCode.Overalls.Main);
@@ -188,6 +211,9 @@ namespace LibV64Core
             Utils.ApplyLightToAddress(0x07EC80, colorCode.Skin.Shading);
             Utils.ApplyLightToAddress(0x07ECA0, colorCode.Hair.Main);
             Utils.ApplyLightToAddress(0x07EC98, colorCode.Hair.Shading);
+            if (string.IsNullOrEmpty(colorCode.Name)) colorCode.Name = "Color Code";
+
+            Console.WriteLine("[C] Applied " + colorCode.Name);
         }
 
         /// <summary>
@@ -248,7 +274,7 @@ namespace LibV64Core
                                                               "8107ECA2 0000\n" +
                                                               "8107EC98 3903\n" +
                                                               "8107EC9A 0000");
-
+            defaultColorCode.Name = "Mario";
             ApplyColorCode(defaultColorCode);
         }
 
@@ -349,19 +375,34 @@ namespace LibV64Core
         /// </summary>
         public static void CoreUpdate()
         {
-            CamFlags = BitConverter.ToUInt16(Memory.ReadBytes(Memory.BaseAddress + 0x33C84A, 2));
-
             // If the camera contains 0x80 (the pause movement flag), the camera is already frozen
+            CamFlags = BitConverter.ToUInt16(Memory.ReadBytes(Memory.BaseAddress + Memory.Map.CameraMovementFlags + 2, 2));
             CameraFrozen = ((Types.CamMoveFlags)CamFlags).HasFlag(Types.CamMoveFlags.PAUSE_SCREEN);
 
             if (CameraFrozen) {
                 // Prevent the freeze camera from getting stuck
                 if (((Types.CamMoveFlags)CamFlags).HasFlag(Types.CamMoveFlags.STARTED_EXITING_C_UP)) {
-                    Memory.WriteBytes(Memory.BaseAddress + 0x33C848 + 3, new byte[] { 0x80 });
+                    Memory.WriteBytes(Memory.BaseAddress + Memory.Map.CameraMovementFlags + 3, new byte[] { 0x80 });
                 }
                 // Re-align our movement perpendicular
                 Memory.WriteBytes(Memory.BaseAddress + 0x33C77C + 3, new byte[] { 0x02 });
             }
+
+            // HUD visibility
+            byte[] livesBytes = (Core.HUD ? Utils.StringToByteArray("2C0000002A00000025640000") : new byte[12]);
+            byte[] coinBytes = (Core.HUD ? Utils.StringToByteArray("2B0000002A00000025640000") : new byte[12]);
+            byte[] starBytes = (Core.HUD ? Utils.StringToByteArray("2D0000002A00000025640000") : new byte[12]);
+            byte[] powerBytes = (Core.HUD ? Utils.StringToByteArray("0100008C") : Utils.StringToByteArray("0100FF00"));
+            byte[] cameraBytes = (Core.HUD ? Utils.StringToByteArray("0C0B8ECF") : new byte[] { 0, 0, 0, 0 });
+            Memory.WriteBytes(Memory.BaseAddress + 0x338380, livesBytes, true);
+            Memory.WriteBytes(Memory.BaseAddress + 0x33838C, coinBytes, true);
+            Memory.WriteBytes(Memory.BaseAddress + 0x338398, starBytes, true);
+            Memory.WriteBytes(Memory.BaseAddress + 0x3325F0, powerBytes, true);
+            Memory.WriteBytes(Memory.BaseAddress + 0x2E3E18, cameraBytes, true);
+
+            // Shadow visibility
+            byte[] shadowBytes = (Core.Shadow) ? new byte[] { 0x00 } : new byte[] { 0x01 };
+            Memory.WriteBytes(Memory.BaseAddress + 0x0F0860 + 3, shadowBytes);
         }
     }
 }
