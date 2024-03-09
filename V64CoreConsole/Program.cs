@@ -13,7 +13,6 @@ namespace V64CoreConsole
     class Program
     {
         private static string? command;
-        private static string linkerMap = "sm64.us.map";
 
         static void Main(string[]? args)
         {
