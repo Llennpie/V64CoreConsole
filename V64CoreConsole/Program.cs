@@ -15,20 +15,37 @@ namespace V64CoreConsole
         private static string? command;
         private static string linkerMap = "sm64.us.map";
 
-        static void Main(string[] args)
+        static void Main(string[]? args)
         {
             Console.Title = "V64CoreConsole";
 
             // Initialize LibV64Core
-            Console.WriteLine("Initializing LibV64Core\n");
+            Console.WriteLine("Initializing LibV64Core");
+            Console.Write("[M] Searching for Project64");
             Process[] emulatorProcesses = Memory.GetEmulatorProcesses("Project64");
-            if (emulatorProcesses.Length == 0)
-                // Throw exception if Project64 is not open
-                throw new InvalidOperationException("ERROR: Could not find active Project64 process");
+            while (emulatorProcesses.Length == 0)
+            {
+                Thread.Sleep(1000);
+                Console.Write(".");
+                emulatorProcesses = Memory.GetEmulatorProcesses("Project64");
+            }
+
+            emulatorProcesses[0].EnableRaisingEvents = true;
+            emulatorProcesses[0].Exited += new EventHandler(OnProcessExit);
 
             Memory.HookEmulatorProcess(emulatorProcesses[0]);
-            Console.WriteLine(emulatorProcesses[0].MainWindowTitle);
-            Memory.SetupCore();
+            Console.Write("\r" + new string(' ', Console.WindowWidth) + "\r[M] " + emulatorProcesses[0].MainWindowTitle + "\n");
+
+            Console.Write("[M] Searching for BaseAddress");
+            Memory.FindBaseAddress();
+            while (Memory.BaseAddress == 0)
+            {
+                Thread.Sleep(1000);
+                Console.Write(".");
+                Memory.FindBaseAddress();
+            }
+            Console.Write("\r" + new string(' ', Console.WindowWidth) + "\r[M] Found BaseAddress\n");
+            Memory.LoadLinkerMap("sm64.us.map");
 
             // Decomp ROM
             if (Core.State == Types.GameState.Decomp)
@@ -116,6 +133,11 @@ namespace V64CoreConsole
                             "shadow - Toggles the player shadow");
                         break;
 
+                    case "refresh":
+                        Console.Clear();
+                        Main(null);
+                        break;
+
                     case "freeze":
                         Core.ToggleFreezeCamera();
                         break;
@@ -200,6 +222,12 @@ namespace V64CoreConsole
                 }
                 Console.WriteLine("");
             }
+        }
+
+        private static void OnProcessExit(object? sender, EventArgs e)
+        {
+            Console.Clear();
+            Main(null);
         }
     }
 }
