@@ -20,7 +20,7 @@ The latest **stable** version of **V64CoreConsole** can be downloaded from the [
 
 ---
 
-![Screenshot](https://cdn.discordapp.com/attachments/863117129347891251/1216049969702895626/image.png)
+![image](https://github.com/Llennpie/V64CoreConsole/assets/44985633/73235e31-c5ec-410e-9a86-045d54712e39)
 
 ---
 
