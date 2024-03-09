@@ -14,13 +14,13 @@ The latest **stable** version of **V64CoreConsole** can be downloaded from the [
 
 **To build from source,** 
 - Download **Visual Studio 2019** *(or greater)* and install the **.NET desktop development** workload
-- Clone the entire project with `git clone https://github.com/Llennpie/V64CoreConsole --recursive`
+- Clone the entire project with `git clone --recursive https://github.com/Llennpie/V64CoreConsole`
 - *If the project has missing references to **LibV64Core**, check its [Usage guide](https://github.com/Llennpie/LibV64Core#usage) in the submodule.*
 - Build the solution as x64
 
 ---
 
-![Screenshot](https://media.discordapp.net/attachments/863117129347891251/1001561950767030352/unknown.png?width=960&height=627)
+![Screenshot](https://cdn.discordapp.com/attachments/863117129347891251/1216049969702895626/image.png)
 
 ---
 
